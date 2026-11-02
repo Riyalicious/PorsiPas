@@ -1,0 +1,25 @@
+Requirement:
+pip freeze > requirement
+
+Install Uvicorn:
+pip install fastapi uvicorn pandas scikit-learn pydantic
+pip install numpy==1.26.4 scikit-learn pandas joblib
+pip install scikit-learn==1.6.1 numpy==1.26.4
+
+Start Server Fast API (uvicorn):
+.\.venv\Scripts\Activate.ps1
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+uvicorn app.main:app --reload
+
+Docker:
+docker build -t porsipas-backend .
+
+Start Server (ngrok):
+ngrok config add-authtoken 3L6CgsxoKvyy7gDGuEo9miOHf1x_7ybRkJU9AfSoEVADH52Qe
+ngrok http 8000
+ngrok http 7860 = Docker
+https://regulate-subsoil-booted.ngrok-free.dev
+
+Start Server Locust:
+locust -f locustfile.py --host=http://127.0.0.1:8000
+http://localhost:8089/r
