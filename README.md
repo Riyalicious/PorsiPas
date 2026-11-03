@@ -8,11 +8,9 @@
 PorsiPas adalah sistem rekomendasi diet cerdas berbasis seluler (mHealth) yang menggunakan arsitektur *client-server*. Aplikasi seluler (Flutter) bertugas murni sebagai antarmuka, sementara seluruh komputasi kecerdasan buatan dijalankan secara terisolasi pada server *backend* (FastAPI). Algoritma **Multi Layer Perceptron (MLP)** digunakan untuk memetakan interaksi metrik biologis pengguna secara dinamis, termasuk variabel frekuensi olahraga.
 
 ## 👥 Anggota Tim & Kontribusi
-1. **[Nama Anggota 1]** - [NIM] - *Peran (misal: AI Engineer / Model Training)*
-2. **[Nama Anggota 2]** - [NIM] - *Peran (misal: Backend Developer / FastAPI & Docker)*
-3. **[Nama Anggota 3]** - [NIM] - *Peran (misal: Frontend Developer / Flutter)*
-4. **[Nama Anggota 4]** - [NIM] - *Peran (misal: UI/UX Designer / Data Preprocessing)*
-5. **[Nama Anggota 5]** - [NIM] - *Peran (misal: QA Tester / Documentation)*
+1. **Tegar Riyadhi Alghifari** - 15240802 - **Peran:** AI Engineer, Model Training, FastAPI & Docker
+2. **Ilyas Ar Rizqy** - 15240649 - **Peran:** Data Preprocessing, Documentation, QA Tester
+3. **Maxswell Stefanus** - 15240753 - **Peran:** UI/UX Designer, Frontend Developer
 
 ## 🛠️ Prasyarat Lingkungan (Environment)
 - **Sistem Operasi:** Windows 11
