@@ -12,7 +12,12 @@ uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 uvicorn app.main:app --reload
 
 Docker:
-docker build -t porsipas-backend .
+docker rm -f container-porsipas
+docker build -t porsipas-backend:v1 .
+docker run -d -p 7860:7860 --name container-porsipas porsipas-backend:v1
+
+Docker Start:
+docker start porsipas-container
 
 Start Server (ngrok):
 ngrok config add-authtoken 3L6CgsxoKvyy7gDGuEo9miOHf1x_7ybRkJU9AfSoEVADH52Qe
@@ -20,6 +25,28 @@ ngrok http 8000
 ngrok http 7860 = Docker
 https://regulate-subsoil-booted.ngrok-free.dev
 
+Start Docker with Ngrok:
+# Build dan jalankan container via Docker Compose
+docker-compose up --build -d
+# Atau jalankan via Docker CLI manual
+docker build -t porsipas-backend .
+docker run -d -p 7860:7860 --name porsipas-container porsipas-backend
+# Jalankan Ngrok menembak ke port 7860
+ngrok http 7860
+
 Start Server Locust:
 locust -f locustfile.py --host=http://127.0.0.1:8000
 http://localhost:8089/r
+
+Save to Github:
+git add .
+git commit -m "Refactor backend FastAPI MLP dan update Flutter service PorsiPas"
+git push origin main
+
+Flutter:
+fluttter doctor
+flutter clean
+flutter pub get
+flutter devices
+flutter run
+flutter build apk --release

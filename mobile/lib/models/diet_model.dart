@@ -1,126 +1,110 @@
-class DietRequest {
-  final int umur;
-  final double tinggi;
-  final double berat;
-  final int frekuensiOlahraga;
-  final String jenisKelamin;
-  final String targetTubuh;
+class Menu {
+  final String nama;
+  final String kategori;
+  final String imageUrl;
+  final double karbohidrat;
+  final double protein;
+  final double lemak;
+  final double porsiGram;
 
-  DietRequest({
-    required this.umur,
-    required this.tinggi,
-    required this.berat,
-    required this.frekuensiOlahraga,
-    required this.jenisKelamin,
-    required this.targetTubuh,
+  Menu({
+    required this.nama, 
+    required this.kategori, 
+    required this.imageUrl, 
+    required this.karbohidrat, 
+    required this.protein, 
+    required this.lemak,
+    required this.porsiGram,
   });
+
+  factory Menu.fromJson(Map<String, dynamic> json) {
+    return Menu(
+      nama: json['nama'] ?? json['nama_menu'] ?? 'Menu Tidak Ditemukan',
+      kategori: json['kategori'] ?? '-',
+      imageUrl: json['image_url'] ?? json['gambar'] ?? json['img'] ?? 'https://via.placeholder.com/150',
+      karbohidrat: (json['karbohidrat'] ?? json['karbo'] ?? 0).toDouble(),
+      protein: (json['protein'] ?? 0).toDouble(),
+      lemak: (json['lemak'] ?? 0).toDouble(),
+      porsiGram: (json['porsi_gram'] ?? json['porsi'] ?? 100).toDouble(),
+    );
+  }
 
   Map<String, dynamic> toJson() {
     return {
-      'umur': umur,
-      'tinggi': tinggi,
-      'berat': berat,
-      'frekuensi_olahraga': frekuensiOlahraga,
-      'jenis_kelamin': jenisKelamin,
-      'target_tubuh': targetTubuh,
+      'nama': nama,
+      'kategori': kategori,
+      'image_url': imageUrl,
+      'karbohidrat': karbohidrat,
+      'protein': protein,
+      'lemak': lemak,
+      'porsi_gram': porsiGram,
     };
   }
 }
 
-class MealDetail {
-  final String menu;
-  final double kalori;
-  final double proteinG;
-  final double lemakG;
-  final double karboG;
-  final String gambarUrl;
+class MealPortion {
+  final double targetKalori;
+  final Menu menu;
 
-  MealDetail({
-    required this.menu,
-    required this.kalori,
-    required this.proteinG,
-    required this.lemakG,
-    required this.karboG,
-    required this.gambarUrl,
-  });
+  MealPortion({required this.targetKalori, required this.menu});
 
-factory MealDetail.fromJson(Map<String, dynamic> json) {
-    return MealDetail(
-      menu: json['menu'] ?? '',
-      kalori: (json['kalori'] as num?)?.toDouble() ?? 0.0,
-      proteinG: (json['protein_g'] as num?)?.toDouble() ?? 0.0,
-      lemakG: (json['lemak_g'] as num?)?.toDouble() ?? 0.0,
-      karboG: (json['karbo_g'] as num?)?.toDouble() ?? 0.0,
-      gambarUrl: json['image_url'] ?? '', // <-- UBAH BAGIAN INI MENJADI image_url
+  factory MealPortion.fromJson(Map<String, dynamic> json) {
+    return MealPortion(
+      targetKalori: (json['target_kalori'] ?? 0).toDouble(),
+      menu: Menu.fromJson(json['menu'] as Map<String, dynamic>? ?? {}),
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'target_kalori': targetKalori,
+      'menu': menu.toJson(),
+    };
   }
 }
 
-class MealPlanResponse {
-  final MealDetail sarapan;
-  final MealDetail makanSiang;
-  final MealDetail makanMalam;
+class DietRecommendation {
+  final String statusKesehatan;
+  final String insightAi;
+  final double targetKarboHarian;
+  final double targetProteinHarian;
+  final double targetLemakHarian;
+  final double targetKaloriHarian;
+  final double kebutuhanAirMl;
+  final int kebutuhanAirGelas;
+  final int skorKesehatan;
+  final Map<String, MealPortion> porsiMakan;
 
-  MealPlanResponse({
-    required this.sarapan,
-    required this.makanSiang,
-    required this.makanMalam,
+  DietRecommendation({
+    required this.statusKesehatan,
+    required this.insightAi,
+    required this.targetKarboHarian,
+    required this.targetProteinHarian,
+    required this.targetLemakHarian,
+    required this.targetKaloriHarian,
+    required this.kebutuhanAirMl,
+    required this.kebutuhanAirGelas,
+    required this.skorKesehatan,
+    required this.porsiMakan,
   });
 
-  factory MealPlanResponse.fromJson(Map<String, dynamic> json) {
-    return MealPlanResponse(
-      sarapan: MealDetail.fromJson(json['sarapan'] ?? {}),
-      makanSiang: MealDetail.fromJson(json['makan_siang'] ?? {}),
-      makanMalam: MealDetail.fromJson(json['makan_malam'] ?? {}),
-    );
-  }
-}
-
-class MacroNutrients {
-  final double karboPersen;
-  final double proteinPersen;
-  final double lemakPersen;
-
-  MacroNutrients({
-    required this.karboPersen,
-    required this.proteinPersen,
-    required this.lemakPersen,
-  });
-
-  factory MacroNutrients.fromJson(Map<String, dynamic> json) {
-    return MacroNutrients(
-      karboPersen: (json['karbo_persen'] as num?)?.toDouble() ?? 0.50,
-      proteinPersen: (json['protein_persen'] as num?)?.toDouble() ?? 0.25,
-      lemakPersen: (json['lemak_persen'] as num?)?.toDouble() ?? 0.25,
-    );
-  }
-}
-
-class DietResponse {
-  final String kategoriDiet;
-  final double bmr;
-  final double kaloriHarian;
-  final double beratIdeal;
-  final MealPlanResponse rekomendasiMakanan;
-  final MacroNutrients makronutrisi;
-
-  DietResponse({
-    required this.kategoriDiet,
-    required this.bmr,
-    required this.kaloriHarian,
-    required this.beratIdeal,
-    required this.rekomendasiMakanan,
-    required this.makronutrisi,
-  });
-
-  factory DietResponse.fromJson(Map<String, dynamic> json) {
-    return DietResponse(
-      kategoriDiet: json['kategori_diet'] ?? '',
-      bmr: (json['bmr'] as num?)?.toDouble() ?? 0.0,
-      kaloriHarian: (json['kalori_harian'] as num?)?.toDouble() ?? 0.0,
-      beratIdeal: (json['berat_ideal'] as num?)?.toDouble() ?? 0.0,
-      rekomendasiMakanan: MealPlanResponse.fromJson(json['rekomendasi_makanan'] ?? {}),
-      makronutrisi: MacroNutrients.fromJson(json['makronutrisi'] ?? {}),
+  factory DietRecommendation.fromJson(Map<String, dynamic> json) {
+    final porsi = json['porsi_makan'] as Map<String, dynamic>? ?? {};
+    return DietRecommendation(
+      statusKesehatan: json['status_kesehatan'] ?? 'Tidak Diketahui',
+      insightAi: json['insight_ai'] ?? '',
+      targetKarboHarian: (json['target_karbo_harian'] ?? 0).toDouble(),
+      targetProteinHarian: (json['target_protein_harian'] ?? 0).toDouble(),
+      targetLemakHarian: (json['target_lemak_harian'] ?? 0).toDouble(),
+      targetKaloriHarian: (json['target_kalori_harian'] ?? 0).toDouble(),
+      kebutuhanAirMl: (json['kebutuhan_air_ml'] ?? 0).toDouble(),
+      kebutuhanAirGelas: json['kebutuhan_air_gelas'] ?? 0,
+      skorKesehatan: json['skor_kesehatan'] ?? 0,
+      porsiMakan: {
+        "sarapan": MealPortion.fromJson(porsi['sarapan'] as Map<String, dynamic>? ?? {}),
+        "makan_siang": MealPortion.fromJson(porsi['makan_siang'] as Map<String, dynamic>? ?? {}),
+        "makan_malam": MealPortion.fromJson(porsi['makan_malam'] as Map<String, dynamic>? ?? {}),
+      },
     );
   }
 }

@@ -28,6 +28,13 @@ class _HomeScreenState extends State<HomeScreen> {
     _loadDashboardData();
   }
 
+  double _parseDoubleSafely(dynamic value) {
+    if (value == null) return 0.0;
+    if (value is num) return value.toDouble();
+    if (value is String) return double.tryParse(value) ?? 0.0;
+    return 0.0;
+  }
+
   Future<void> _loadDashboardData() async {
     setState(() => _isLoading = true);
     final history = await StorageService.getDietHistory();
@@ -37,14 +44,19 @@ class _HomeScreenState extends State<HomeScreen> {
       final latest = history.last; 
       setState(() {
         _hasData = true;
-        _targetKalori = double.tryParse(latest['kalori'].toString()) ?? 0;
+        _targetKalori = _parseDoubleSafely(latest['kalori']);
         
         String rawKategori = latest['status'] ?? 'Balanced Diet';
         _kategoriDiet = rawKategori.replaceAll('(AI)', '').trim(); 
         
-        _proteinG = (_targetKalori * 0.30) / 4;
-        _karboG = (_targetKalori * 0.45) / 4;
-        _lemakG = (_targetKalori * 0.25) / 9;
+        _proteinG = _parseDoubleSafely(latest['target_protein_harian']);
+        if (_proteinG <= 0) _proteinG = (_targetKalori * 0.25) / 4;
+
+        _karboG = _parseDoubleSafely(latest['target_karbo_harian']);
+        if (_karboG <= 0) _karboG = (_targetKalori * 0.50) / 4;
+
+        _lemakG = _parseDoubleSafely(latest['target_lemak_harian']);
+        if (_lemakG <= 0) _lemakG = (_targetKalori * 0.25) / 9;
       });
     } else {
       setState(() {
@@ -66,17 +78,18 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() => _waterCount = newCount);
   }
 
-  // --- FUNGSI EDUKASI: Deskripsi Detail Klasifikasi AI ---
   String _getDietDescription(String diet) {
     String lowerDiet = diet.toLowerCase();
     if (lowerDiet.contains('protein')) {
-      return 'AI merekomendasikan diet Tinggi Protein untuk mendukung pemeliharaan massa otot, mengoptimalkan pemulihan sel, dan memberikan rasa kenyang yang lebih lama sepanjang hari.';
+      return 'AI merekomendasikan diet Tinggi Protein untuk mendukung pemeliharaan massa otot, mengoptimalkan pemulihan sel, dan memberikan rasa kenyang lebih lama.';
     } else if (lowerDiet.contains('carb')) {
-      return 'AI merekomendasikan diet Rendah Karbohidrat untuk membatasi lonjakan gula darah dan mendorong tubuh Anda menggunakan cadangan lemak sebagai sumber energi utama.';
+      return 'AI merekomendasikan diet Rendah Karbohidrat untuk membatasi lonjakan gula darah dan mendorong pembakaran cadangan lemak tubuh.';
+    } else if (lowerDiet.contains('fat')) {
+      return 'AI merekomendasikan diet Rendah Lemak untuk mengontrol asupan kalori secara efisien dan mendukung pemeliharaan berat badan.';
     } else if (lowerDiet.contains('balanced')) {
-      return 'AI merekomendasikan diet Seimbang. Porsi ini mendistribusikan nutrisi secara merata untuk menjaga stabilitas metabolisme, energi harian, dan kesehatan tubuh jangka panjang.';
+      return 'AI merekomendasikan diet Seimbang. Porsi ini mendistribusikan nutrisi secara merata untuk menjaga stabilitas metabolisme dan energi harian.';
     }
-    return 'Diet yang disesuaikan secara khusus dengan kalibrasi fisik dan target biologis Anda.';
+    return 'Diet disesuaikan secara khusus dengan kalibrasi fisik dan target biologis Anda.';
   }
 
   @override
@@ -98,10 +111,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 Container(
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    color: primaryGreen.withOpacity(0.05),
+                    color: primaryGreen.withValues(alpha: 0.05),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(Icons.monitor_weight_outlined, size: 80, color: primaryGreen.withOpacity(0.5)),
+                  child: Icon(Icons.monitor_weight_outlined, size: 80, color: primaryGreen.withValues(alpha: 0.5)),
                 ),
                 const SizedBox(height: 24),
                 const Text(
@@ -142,7 +155,6 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               const SizedBox(height: 24),
 
-              // 1. KARTU TARGET METABOLISME HARIAN
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
@@ -153,7 +165,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   borderRadius: BorderRadius.circular(24),
                   border: Border.all(color: Colors.green.shade100, width: 1.5),
-                  boxShadow: [BoxShadow(color: primaryGreen.withOpacity(0.05), blurRadius: 20, offset: const Offset(0, 10))],
+                  boxShadow: [BoxShadow(color: primaryGreen.withValues(alpha: 0.05), blurRadius: 20, offset: const Offset(0, 10))],
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -167,7 +179,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     const SizedBox(height: 8),
                     
-                    // --- NAMA KLASIFIKASI & PENJELASAN (DIPERBESAR) ---
                     Text(
                       _kategoriDiet,
                       style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w900, color: primaryGreen, height: 1.1),
@@ -176,9 +187,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: primaryGreen.withOpacity(0.08),
+                        color: primaryGreen.withValues(alpha: 0.08),
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: primaryGreen.withOpacity(0.15)),
+                        border: Border.all(color: primaryGreen.withValues(alpha: 0.15)),
                       ),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -195,9 +206,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                     const SizedBox(height: 24),
-                    // ---------------------------------------------------
 
-                    // KALORI HARIAN
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
@@ -211,7 +220,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     const SizedBox(height: 24),
 
-                    // MAKRONUTRISI
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
@@ -222,7 +230,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     const Padding(padding: EdgeInsets.symmetric(vertical: 16), child: Divider(color: Colors.black12, height: 1)),
                     
-                    // HIDRASI TUBUH & TOMBOL (+ / -)
                     Row(
                       children: [
                         Container(
@@ -241,7 +248,6 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ),
                         
-                        // Tombol Kurang (-)
                         InkWell(
                           onTap: () => _updateWater(-1),
                           borderRadius: BorderRadius.circular(12),
@@ -257,7 +263,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         const SizedBox(width: 8),
                         
-                        // Tombol Tambah (+)
                         ElevatedButton(
                           onPressed: () => _updateWater(1),
                           style: ElevatedButton.styleFrom(
@@ -282,11 +287,9 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               const SizedBox(height: 24),
 
-              // 2. PANDUAN ISI PIRINGKU
               _buildPiringkuGuide(),
               const SizedBox(height: 20),
 
-              // 3. CATATAN PELATIH AI
               _buildInsightsCard(),
               const SizedBox(height: 40),
             ],
@@ -304,7 +307,7 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           Container(
             padding: const EdgeInsets.all(6),
-            decoration: BoxDecoration(color: emeraldGreen.withOpacity(0.2), borderRadius: BorderRadius.circular(8)),
+            decoration: BoxDecoration(color: emeraldGreen.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(8)),
             child: const Icon(Icons.eco, color: primaryGreen, size: 24),
           ),
           const SizedBox(width: 10),
@@ -393,7 +396,7 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           Text(title, style: TextStyle(fontWeight: FontWeight.w900, fontSize: 11, color: color)),
           const SizedBox(height: 2),
-          Text(ratio, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 10, color: color.withOpacity(0.7))),
+          Text(ratio, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 10, color: color.withValues(alpha: 0.7))),
           const SizedBox(height: 6),
           Text(desc, style: const TextStyle(fontSize: 9, color: Colors.black87, height: 1.3)),
         ],

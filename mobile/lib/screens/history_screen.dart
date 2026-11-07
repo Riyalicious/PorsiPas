@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fl_chart/fl_chart.dart'; // Import library Chart
@@ -250,7 +249,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: Colors.grey.shade200),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 4))],
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 10, offset: const Offset(0, 4))],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -390,7 +389,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
               ),
               belowBarData: BarAreaData(
                 show: true,
-                color: primaryGreen.withOpacity(0.15),
+                color: primaryGreen.withValues(alpha: 0.15),
               ),
             ),
           ],
@@ -453,7 +452,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
         border: Border.all(color: Colors.grey.shade200),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))],
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 10, offset: const Offset(0, 4))],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -477,7 +476,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
           const SizedBox(height: 16),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(color: progressColor.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
+            decoration: BoxDecoration(color: progressColor.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -526,7 +525,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
           children: [
             Container(
               padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(color: const Color(0xFF10B981).withOpacity(0.2), borderRadius: BorderRadius.circular(8)),
+              decoration: BoxDecoration(color: const Color(0xFF10B981).withValues(alpha: 0.2), borderRadius: BorderRadius.circular(8)),
               child: const Icon(Icons.eco, color: primaryGreen, size: 24),
             ),
             const SizedBox(width: 10),
@@ -584,8 +583,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
           children: [
             Container(
               padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(color: primaryGreen.withOpacity(0.05), shape: BoxShape.circle),
-              child: Icon(Icons.history_rounded, size: 80, color: primaryGreen.withOpacity(0.5)),
+              decoration: BoxDecoration(color: primaryGreen.withValues(alpha: 0.05), shape: BoxShape.circle),
+              child: Icon(Icons.history_rounded, size: 80, color: primaryGreen.withValues(alpha: 0.5)),
             ),
             const SizedBox(height: 24),
             const Text('Belum Ada Riwayat', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: darkText)),
@@ -610,7 +609,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
         border: Border.all(color: Colors.grey.shade200),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 15, offset: const Offset(0, 8))],
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 15, offset: const Offset(0, 8))],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -622,7 +621,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
               children: [
                 Container(
                   padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(color: primaryGreen.withOpacity(0.1), shape: BoxShape.circle),
+                  decoration: BoxDecoration(color: primaryGreen.withValues(alpha: 0.1), shape: BoxShape.circle),
                   child: const Icon(Icons.favorite, color: primaryGreen, size: 24),
                 ),
                 const SizedBox(width: 16),

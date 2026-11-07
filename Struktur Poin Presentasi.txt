@@ -1,0 +1,12 @@
+1. Struktur Poin Presentasi & Jurnal ("Implementasi MLP pada Aplikasi Diet Berbasis Mobile")
+Pendahuluan: Urgensi personalisasi menu makanan sehat berbasis data nutrisi lokal Indonesia.
+Arsitektur Model: Multi-Layer Perceptron (MLP) dengan konfigurasi hidden_layer_sizes=(64, 32), fungsi aktivasi ReLU, dan optimasi Adam.
+Data Preprocessing: Standard Scaling (StandardScaler), Label Encoding, dan penggabungan dataset menu (menu_lauk_bersih.csv + healthy_eating_dataset.csv).
+Hasil & Evaluasi: Performa klasifikasi profil pengguna mencapai akurasi 100.00% pada data uji.
+
+2. Draf Pembahasan Jurnal/Laporan
+Gunakan poin ini untuk bab Metodologi dan Hasil:
+Arsitektur MLP: hidden_layer_sizes=(64, 32), aktivasi ReLU, optimizer Adam.
+Preprocessing: Scaling data dengan StandardScaler dan pengodean label dengan LabelEncoder.
+Evaluasi Performa: Akurasi klasifikasi profil pengguna mencapai 100.00%.
+Sistem Rekomendasi: Integrasi rule-based macro ratio categorization pada dataset gabungan menu (menu_lauk_bersih.csv + healthy_eating_dataset.csv).
