@@ -55,7 +55,7 @@ docker run -d -p 7860:7860 --name container-porsipas porsipas-backend:v1
 ### 3. Expose Server ke Publik (Ngrok)
 Agar aplikasi seluler/emulator dapat mengakses backend lokal melalui jalur publik:
 ```bash
-ngrok http 7861
+ngrok http 7860
 ```
 *(Salin URL HTTPS yang dihasilkan, contoh: `[https://xxxx.ngrok-free.app](https://xxxx.ngrok-free.app)`)*
 
