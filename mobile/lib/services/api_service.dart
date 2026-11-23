@@ -85,4 +85,18 @@ class ApiService {
       throw Exception('Gagal mengacak menu: $e');
     }
   }
+  static Future<List<dynamic>> getMenuOptions(double targetKalori, String waktuMakan) async {
+  final response = await http.post(
+    Uri.parse('$baseUrl/api/v1/menu-options'),
+    headers: {'Content-Type': 'application/json'},
+    body: jsonEncode({
+      'target_kalori': targetKalori,
+      'waktu_makan': waktuMakan,
+    }),
+  );
+  if (response.statusCode == 200) {
+    return jsonDecode(response.body)['data'];
+  }
+  throw Exception('Gagal memuat pilihan menu');
+}
 }

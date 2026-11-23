@@ -22,7 +22,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   ];
 
   static const Color primaryGreen = Color(0xFF047857);
-  static const Color emeraldGreen = Color(0xFF10B981);
+  //static const Color emeraldGreen = Color(0xFF10B981);
 
   @override
   Widget build(BuildContext context) {

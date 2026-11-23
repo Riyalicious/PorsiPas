@@ -3,7 +3,7 @@ from pydantic import BaseModel
 import pandas as pd
 import joblib
 import numpy as np
-from app.schemas import UserData, DietRecommendationResponse
+from app.schemas import UserData
 import os
 
 app = FastAPI(
@@ -13,6 +13,10 @@ app = FastAPI(
 
 class RegenerateRequest(BaseModel):
     kategori: str
+
+class MenuListRequest(BaseModel):
+    target_kalori: float
+    waktu_makan: str
 
 file_path = "data/menu_combined.csv"
 if not os.path.exists(file_path):
@@ -58,11 +62,9 @@ def hitung_porsi(target_kal, kalori_db):
 def get_sample_menu(df, category, min_cal, max_cal):
     if df is None or df.empty: return None
     
-    # Filter berdasarkan kategori AI
     subset = df[df['Diet_Category'] == category]
     if subset.empty: subset = df
     
-    # Filter kalori
     filtered = subset[(subset['Kalori'] >= min_cal) & (subset['Kalori'] <= max_cal)]
     if filtered.empty:
         filtered = subset
@@ -92,7 +94,6 @@ def _format_menu(row, target_kal, kategori):
 
 @app.post("/api/v1/predict")
 def predict_diet(user: UserData):
-    # 1. Map input user ke kategori GYM.csv
     gender_str = 'Male' if user.is_pria else 'Female'
     
     if user.target_tubuh == "Menurunkan Berat Badan":
@@ -110,7 +111,6 @@ def predict_diet(user: UserData):
     
     exercise_str = exercise_map.get(user.frekuensi_olahraga, 'Moderate cardio, Strength training, and 5000 steps walking')
 
-    # 2. Encoding & Scaling untuk MLP
     input_encoded = pd.DataFrame([{
         'Gender': label_encoders['Gender'].transform([gender_str])[0],
         'Goal': label_encoders['Goal'].transform([goal_str])[0],
@@ -123,7 +123,6 @@ def predict_diet(user: UserData):
     raw_label = label_encoders['Meal Plan'].inverse_transform([pred_idx])[0]
     diet_category = gym_to_category[raw_label]
 
-    # 3. Hitung BMR, TDEE, & Kalori Target
     bmr = (10 * user.berat) + (6.25 * user.tinggi) - (5 * user.umur) + (5 if user.is_pria else -161)
     tdee = bmr * (1.2 + (user.frekuensi_olahraga * 0.1))
 
@@ -135,7 +134,6 @@ def predict_diet(user: UserData):
     t_siang = target_kalori * 0.40
     t_malam = target_kalori * 0.35
 
-    # 4. Sampling Menu berdasarkan Diet_Category dari MLP
     sarapan = get_sample_menu(df_menu, diet_category, t_sarapan * 0.7, t_sarapan * 1.3)
     siang = get_sample_menu(df_menu, diet_category, t_siang * 0.7, t_siang * 1.3)
     malam = get_sample_menu(df_menu, diet_category, t_malam * 0.7, t_malam * 1.3)
@@ -161,3 +159,10 @@ def predict_diet(user: UserData):
 def regenerate_menu(req: RegenerateRequest):
     selected = get_sample_menu(df_menu, "Balanced", 100, 1000)
     return {"status": "success", "data": _format_menu(selected, 400, req.kategori)}
+
+@app.post("/api/v1/menu-options")
+def get_menu_options(req: MenuListRequest):
+    if df_menu.empty: return {"status": "error", "data": []}
+    samples = df_menu.sample(n=min(15, len(df_menu)))
+    data = [_format_menu(row, req.target_kalori, req.waktu_makan) for _, row in samples.iterrows()]
+    return {"status": "success", "data": data}

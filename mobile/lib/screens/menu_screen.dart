@@ -15,7 +15,6 @@ class _MenuScreenState extends State<MenuScreen> {
   double _targetKalori = 0;
   
   String _insightAi = "";
-  // Variabel makro disiapkan jika nanti ingin ditampilkan di header
   double _targetKarboHarian = 0.0;
   double _targetProteinHarian = 0.0;
   double _targetLemakHarian = 0.0;
@@ -46,53 +45,58 @@ class _MenuScreenState extends State<MenuScreen> {
 
   Future<void> _loadAIData() async {
     setState(() => _isLoading = true);
-    final history = await StorageService.getDietHistory();
     
-    if (history.isNotEmpty) {
-      final lastRecord = history.last;
-      setState(() {
-        _hasData = true; 
-        _targetKalori = _parseDoubleSafely(lastRecord['kalori']);
-        
-        _insightAi = lastRecord['insight_ai'] ?? 
-            "AI membagi kalorimu ke dalam 3 Makanan Utama. Tambahkan snack sehat secara opsional jika diperlukan.";
-        _targetKarboHarian = _parseDoubleSafely(lastRecord['target_karbo_harian']);
-        _targetProteinHarian = _parseDoubleSafely(lastRecord['target_protein_harian']);
-        _targetLemakHarian = _parseDoubleSafely(lastRecord['target_lemak_harian']);
-        
-        _sarapanData = {
-          'nama': lastRecord['menu_sarapan'] ?? "Menu tidak ditemukan",
-          'gambar': lastRecord['img_sarapan'] ?? "",
-          'karbo': _parseDoubleSafely(lastRecord['karbo_sarapan']),
-          'protein': _parseDoubleSafely(lastRecord['pro_sarapan']),
-          'lemak': _parseDoubleSafely(lastRecord['lemak_sarapan']),
-          'porsi_gram': _parseDoubleSafely(lastRecord['porsi_gram_sarapan'] ?? 100),
-        };
+    try {
+      final history = await StorageService.getDietHistory();
+      
+      if (history.isNotEmpty) {
+        final lastRecord = history.last;
+        setState(() {
+          _hasData = true; 
+          _targetKalori = _parseDoubleSafely(lastRecord['kalori']);
+          
+          _insightAi = lastRecord['insight_ai']?.toString() ?? 
+              "AI membagi kalorimu ke dalam 3 Makanan Utama.";
+          _targetKarboHarian = _parseDoubleSafely(lastRecord['target_karbo_harian']);
+          _targetProteinHarian = _parseDoubleSafely(lastRecord['target_protein_harian']);
+          _targetLemakHarian = _parseDoubleSafely(lastRecord['target_lemak_harian']);
+          
+          _sarapanData = {
+            'nama': lastRecord['menu_sarapan']?.toString() ?? "Menu tidak ditemukan",
+            'gambar': lastRecord['img_sarapan']?.toString() ?? "",
+            'karbo': _parseDoubleSafely(lastRecord['karbo_sarapan']),
+            'protein': _parseDoubleSafely(lastRecord['pro_sarapan']),
+            'lemak': _parseDoubleSafely(lastRecord['lemak_sarapan']),
+            'porsi_gram': _parseDoubleSafely(lastRecord['porsi_gram_sarapan'] ?? 100),
+          };
 
-        _siangData = {
-          'nama': lastRecord['menu_siang'] ?? "Menu tidak ditemukan",
-          'gambar': lastRecord['img_siang'] ?? "",
-          'karbo': _parseDoubleSafely(lastRecord['karbo_siang']),
-          'protein': _parseDoubleSafely(lastRecord['pro_siang']),
-          'lemak': _parseDoubleSafely(lastRecord['lemak_siang']),
-          'porsi_gram': _parseDoubleSafely(lastRecord['porsi_gram_siang'] ?? 150),
-        };
+          _siangData = {
+            'nama': lastRecord['menu_siang']?.toString() ?? "Menu tidak ditemukan",
+            'gambar': lastRecord['img_siang']?.toString() ?? "",
+            'karbo': _parseDoubleSafely(lastRecord['karbo_siang']),
+            'protein': _parseDoubleSafely(lastRecord['pro_siang']),
+            'lemak': _parseDoubleSafely(lastRecord['lemak_siang']),
+            'porsi_gram': _parseDoubleSafely(lastRecord['porsi_gram_siang'] ?? 150),
+          };
 
-        _malamData = {
-          'nama': lastRecord['menu_malam'] ?? "Menu tidak ditemukan",
-          'gambar': lastRecord['img_malam'] ?? "",
-          'karbo': _parseDoubleSafely(lastRecord['karbo_malam']),
-          'protein': _parseDoubleSafely(lastRecord['pro_malam']),
-          'lemak': _parseDoubleSafely(lastRecord['lemak_malam']),
-          'porsi_gram': _parseDoubleSafely(lastRecord['porsi_gram_malam'] ?? 150),
-        };
-      });
-    } else {
-      setState(() {
-        _hasData = false;
-      });
+          _malamData = {
+            'nama': lastRecord['menu_malam']?.toString() ?? "Menu tidak ditemukan",
+            'gambar': lastRecord['img_malam']?.toString() ?? "",
+            'karbo': _parseDoubleSafely(lastRecord['karbo_malam']),
+            'protein': _parseDoubleSafely(lastRecord['pro_malam']),
+            'lemak': _parseDoubleSafely(lastRecord['lemak_malam']),
+            'porsi_gram': _parseDoubleSafely(lastRecord['porsi_gram_malam'] ?? 150),
+          };
+        });
+      } else {
+        setState(() => _hasData = false);
+      }
+    } catch (e) {
+      debugPrint("Error loading AI Data: $e");
+      setState(() => _hasData = false);
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
-    setState(() => _isLoading = false);
   }
 
   Future<void> _refreshSingleMenu(String category) async {
@@ -109,39 +113,7 @@ class _MenuScreenState extends State<MenuScreen> {
 
       final newMenu = await ApiService.regenerateSingleMenu(apiCategory);
       
-      setState(() {
-        if (category == 'SARAPAN') _sarapanData = newMenu;
-        if (category == 'SIANG') _siangData = newMenu;
-        if (category == 'MALAM') _malamData = newMenu;
-      });
-
-      final history = await StorageService.getDietHistory();
-      if (history.isNotEmpty) {
-        var lastRecord = history.last;
-        if (category == 'SARAPAN') {
-           lastRecord['menu_sarapan'] = newMenu['nama'];
-           lastRecord['img_sarapan'] = newMenu['gambar'];
-           lastRecord['karbo_sarapan'] = newMenu['karbo'];
-           lastRecord['pro_sarapan'] = newMenu['protein'];
-           lastRecord['lemak_sarapan'] = newMenu['lemak'];
-           lastRecord['porsi_gram_sarapan'] = newMenu['porsi_gram'];
-        } else if (category == 'SIANG') {
-           lastRecord['menu_siang'] = newMenu['nama'];
-           lastRecord['img_siang'] = newMenu['gambar'];
-           lastRecord['karbo_siang'] = newMenu['karbo'];
-           lastRecord['pro_siang'] = newMenu['protein'];
-           lastRecord['lemak_siang'] = newMenu['lemak'];
-           lastRecord['porsi_gram_siang'] = newMenu['porsi_gram'];
-        } else if (category == 'MALAM') {
-           lastRecord['menu_malam'] = newMenu['nama'];
-           lastRecord['img_malam'] = newMenu['gambar'];
-           lastRecord['karbo_malam'] = newMenu['karbo'];
-           lastRecord['pro_malam'] = newMenu['protein'];
-           lastRecord['lemak_malam'] = newMenu['lemak'];
-           lastRecord['porsi_gram_malam'] = newMenu['porsi_gram'];
-        }
-        await StorageService.updateLastDietRecord(lastRecord);
-      }
+      await _updateStorageRecord(category, newMenu);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -159,12 +131,136 @@ class _MenuScreenState extends State<MenuScreen> {
     }
   }
 
+  Future<void> _updateStorageRecord(String category, Map<String, dynamic> newMenu) async {
+    setState(() {
+      if (category.contains('SARAPAN')) _sarapanData = newMenu;
+      else if (category.contains('SIANG')) _siangData = newMenu;
+      else if (category.contains('MALAM')) _malamData = newMenu;
+    });
+
+    final history = await StorageService.getDietHistory();
+    if (history.isNotEmpty) {
+      var lastRecord = history.last;
+      if (category.contains('SARAPAN')) {
+         lastRecord['menu_sarapan'] = newMenu['nama'];
+         lastRecord['img_sarapan'] = newMenu['gambar'] ?? newMenu['image_url'];
+         lastRecord['karbo_sarapan'] = newMenu['karbo'] ?? newMenu['karbohidrat'];
+         lastRecord['pro_sarapan'] = newMenu['protein'];
+         lastRecord['lemak_sarapan'] = newMenu['lemak'];
+         lastRecord['porsi_gram_sarapan'] = newMenu['porsi_gram'];
+      } else if (category.contains('SIANG')) {
+         lastRecord['menu_siang'] = newMenu['nama'];
+         lastRecord['img_siang'] = newMenu['gambar'] ?? newMenu['image_url'];
+         lastRecord['karbo_siang'] = newMenu['karbo'] ?? newMenu['karbohidrat'];
+         lastRecord['pro_siang'] = newMenu['protein'];
+         lastRecord['lemak_siang'] = newMenu['lemak'];
+         lastRecord['porsi_gram_siang'] = newMenu['porsi_gram'];
+      } else if (category.contains('MALAM')) {
+         lastRecord['menu_malam'] = newMenu['nama'];
+         lastRecord['img_malam'] = newMenu['gambar'] ?? newMenu['image_url'];
+         lastRecord['karbo_malam'] = newMenu['karbo'] ?? newMenu['karbohidrat'];
+         lastRecord['pro_malam'] = newMenu['protein'];
+         lastRecord['lemak_malam'] = newMenu['lemak'];
+         lastRecord['porsi_gram_malam'] = newMenu['porsi_gram'];
+      }
+      await StorageService.updateLastDietRecord(lastRecord);
+    }
+  }
+
+  Future<void> _showMenuOptions(BuildContext context, String waktu, int targetKalori, Map<String, dynamic> currentData) async {
+    Future<List<dynamic>>? fetchFuture;
+    try {
+      fetchFuture = ApiService.getMenuOptions(targetKalori.toDouble(), waktu);
+    } catch (e) {
+      fetchFuture = Future.error(e);
+    }
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (context) {
+        return SafeArea(
+          child: Padding(
+            padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  margin: const EdgeInsets.only(top: 12, bottom: 8),
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(10)),
+                ),
+                const Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: Text("Pilih Menu", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: darkText)),
+                ),
+                Flexible(
+                  child: FutureBuilder<List<dynamic>>(
+                    future: fetchFuture,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Padding(
+                          padding: EdgeInsets.all(32.0),
+                          child: Center(child: CircularProgressIndicator(color: primaryGreen)),
+                        );
+                      }
+                      if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
+                        return Padding(
+                          padding: const EdgeInsets.all(32.0),
+                          child: Center(child: Text('Gagal memuat menu: ${snapshot.error ?? "Data tidak ditemukan"}')),
+                        );
+                      }
+                      
+                      final menus = snapshot.data!;
+                      return ListView.builder(
+                        shrinkWrap: true,
+                        padding: const EdgeInsets.all(16),
+                        itemCount: menus.length,
+                        itemBuilder: (context, index) {
+                          final menu = menus[index];
+                          return ListTile(
+                            leading: Image.network(menu['image_url'] ?? '', width: 50, height: 50, fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) => const Icon(Icons.fastfood, size: 50, color: Colors.black26)),
+                            title: Text(menu['nama']?.toString() ?? 'Tanpa Nama', style: const TextStyle(fontWeight: FontWeight.bold)),
+                            subtitle: Text('Porsi: ${menu['porsi_gram']}g | Kalori: $targetKalori Kcal\nPro: ${menu['protein']}g | Lemak: ${menu['lemak']}g | Karbo: ${menu['karbohidrat']}g'),
+                            isThreeLine: true,
+                            onTap: () {
+                              Navigator.pop(context);
+                              final mappedMenu = {
+                                'nama': menu['nama'],
+                                'gambar': menu['image_url'],
+                                'karbo': menu['karbohidrat'],
+                                'protein': menu['protein'],
+                                'lemak': menu['lemak'],
+                                'porsi_gram': menu['porsi_gram'],
+                              };
+                              _updateStorageRecord(waktu.toUpperCase(), mappedMenu);
+                            },
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator(color: primaryGreen)));
+      return const Scaffold(
+        backgroundColor: Colors.white,
+        body: Center(child: CircularProgressIndicator(color: primaryGreen))
+      );
     }
-
     if (!_hasData) {
       return Scaffold(
         backgroundColor: Colors.white,
@@ -200,9 +296,10 @@ class _MenuScreenState extends State<MenuScreen> {
       );
     }
 
-    final int kaloriSarapan = (_targetKalori * 0.25).toInt();
-    final int kaloriSiang = (_targetKalori * 0.40).toInt();
-    final int kaloriMalam = (_targetKalori * 0.35).toInt();
+    final double safeKalori = _targetKalori.isNaN || _targetKalori.isInfinite ? 0 : _targetKalori;
+    final int kaloriSarapan = (safeKalori * 0.25).toInt();
+    final int kaloriSiang = (safeKalori * 0.40).toInt();
+    final int kaloriMalam = (safeKalori * 0.35).toInt();
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -396,23 +493,36 @@ class _MenuScreenState extends State<MenuScreen> {
                   Positioned(
                     top: 16,
                     right: 16,
-                    child: GestureDetector(
-                      onTap: isRefreshing ? null : onRefresh,
-                      child: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.9),
-                          shape: BoxShape.circle,
-                          boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 4)],
+                    child: Row(
+                      children: [
+                        GestureDetector(
+                          onTap: () => _showMenuOptions(context, title, calories, data),
+                          child: Container(
+                            margin: const EdgeInsets.only(right: 8),
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            decoration: BoxDecoration(color: Colors.white.withAlpha(230), borderRadius: BorderRadius.circular(20)),
+                            child: const Text('Pilih Menu', style: TextStyle(color: primaryGreen, fontWeight: FontWeight.bold, fontSize: 12)),
+                          ),
                         ),
-                        child: isRefreshing
-                            ? const SizedBox(
-                                width: 18,
-                                height: 18,
-                                child: CircularProgressIndicator(color: primaryGreen, strokeWidth: 2),
-                              )
-                            : const Icon(Icons.sync_rounded, color: primaryGreen, size: 18),
-                      ),
+                        GestureDetector(
+                          onTap: isRefreshing ? null : onRefresh,
+                          child: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withAlpha(230),
+                              shape: BoxShape.circle,
+                              boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 4)],
+                            ),
+                            child: isRefreshing
+                                ? const SizedBox(
+                                    width: 18,
+                                    height: 18,
+                                    child: CircularProgressIndicator(color: primaryGreen, strokeWidth: 2),
+                                  )
+                                : const Icon(Icons.sync_rounded, color: primaryGreen, size: 18),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
 

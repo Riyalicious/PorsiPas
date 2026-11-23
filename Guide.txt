@@ -9,6 +9,7 @@ pip install scikit-learn==1.6.1 numpy==1.26.4
 Start Server Fast API (uvicorn):
 .\.venv\Scripts\Activate.ps1
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+uvicorn app.main:app --reload --host 0.0.0.0 --port 7860
 uvicorn app.main:app --reload
 
 Docker:
@@ -35,13 +36,17 @@ docker run -d -p 7860:7860 --name porsipas-container porsipas-backend
 ngrok http 7860
 
 Start Server Locust:
-locust -f locustfile.py --host=http://127.0.0.1:8000
-http://localhost:8089/r
+locust -f locustfile.py --host=http://localhost:7860
+locust -f locustfile.py --host=https://regulate-subsoil-booted.ngrok-free.dev
 
-Save to Github:
+Save Github (Team):
 git add .
 git commit -m "Refactor backend FastAPI MLP dan update Flutter service PorsiPas"
 git push origin main
+
+Save Github (Solo):
+git rebase --abort
+git push origin main --force
 
 Flutter:
 fluttter doctor
